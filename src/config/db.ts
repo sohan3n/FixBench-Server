@@ -35,6 +35,7 @@ export async function connectDB(): Promise<Db> {
   await Promise.all([
     usersCollection.createIndex({ email: 1 }, { unique: true }),
     paymentsCollection.createIndex({ stripeSessionId: 1 }, { unique: true }),
+    paymentsCollection.createIndex({ paidAt: -1 }),
     servicesCollection.createIndex({
       approvalStatus: 1,
       isAvailable: 1,

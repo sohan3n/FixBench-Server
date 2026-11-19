@@ -4,6 +4,15 @@ import { verifyToken } from "../middlewares/auth.js";
 
 const router = Router();
 
+function isValidHttpUrl(value: string): boolean {
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 // GET /api/users/me — Returns live profile of the authenticated user
 router.get("/me", verifyToken, async (req: Request, res: Response) => {
   try {
@@ -37,38 +46,81 @@ router.get("/me", verifyToken, async (req: Request, res: Response) => {
 router.patch("/profile", verifyToken, async (req: Request, res: Response) => {
   try {
     const { name, phone, area, bio, image } = req.body as {
-      name?: string;
-      phone?: string;
-      area?: string;
-      bio?: string;
-      image?: string;
+      name?: unknown;
+      phone?: unknown;
+      area?: unknown;
+      bio?: unknown;
+      image?: unknown;
     };
 
     const updates: Record<string, unknown> = {
       updatedAt: new Date(),
     };
+    let updatedName: string | null = null;
 
-    if (typeof name === "string" && name.trim().length >= 2) {
-      updates.name = name.trim();
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim().length < 2) {
+        res
+          .status(400)
+          .json({ message: "Name must be at least 2 characters long" });
+        return;
+      }
+      updatedName = name.trim();
+      updates.name = updatedName;
     }
-    if (typeof phone === "string") {
+
+    if (phone !== undefined) {
+      if (typeof phone !== "string") {
+        res.status(400).json({ message: "Invalid phone number format" });
+        return;
+      }
       updates.phone = phone.trim();
     }
-    if (typeof area === "string") {
+
+    if (area !== undefined) {
+      if (typeof area !== "string") {
+        res.status(400).json({ message: "Invalid area format" });
+        return;
+      }
       updates.area = area.trim();
     }
-    if (typeof bio === "string") {
+
+    if (bio !== undefined) {
+      if (typeof bio !== "string") {
+        res.status(400).json({ message: "Invalid bio format" });
+        return;
+      }
       updates.bio = bio.trim();
     }
-    if (typeof image === "string" && image.trim().length > 0) {
-      updates.image = image.trim();
+
+    if (image !== undefined) {
+      if (typeof image !== "string") {
+        res.status(400).json({ message: "Invalid image URL format" });
+        return;
+      }
+      const trimmedImage = image.trim();
+      if (trimmedImage.length > 0 && !isValidHttpUrl(trimmedImage)) {
+        res
+          .status(400)
+          .json({ message: "Profile image must be a valid HTTP/HTTPS URL" });
+        return;
+      }
+      updates.image = trimmedImage;
     }
 
-    const { usersCollection } = getCollections();
+    const { usersCollection, servicesCollection } = getCollections();
     await usersCollection.updateOne(
       { email: req.user!.email },
       { $set: updates }
     );
+
+    // Keep technicianName consistent across public service cards if a technician updates their name
+    if (updatedName && req.user!.role === "technician") {
+      await servicesCollection.updateMany(
+        { technicianEmail: req.user!.email },
+        { $set: { technicianName: updatedName } }
+      );
+    }
 
     const updatedUser = await usersCollection.findOne({
       email: req.user!.email,

@@ -5,6 +5,7 @@ import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/users.js";
 import serviceRoutes from "./routes/services.js";
 import bookingRoutes from "./routes/bookings.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.get("/health", (_req: Request, res: Response) => {
 app.use("/api/users", userRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 404 Fallback for unknown API routes
 app.use((_req: Request, res: Response) => {
