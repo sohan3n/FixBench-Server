@@ -9,6 +9,16 @@ import {
 
 const router = Router();
 
+interface BookingStatusUpdateDoc {
+  status: string;
+  updatedAt: Date;
+  finalAmount?: number;
+  statusHistory: {
+    status: string;
+    changedAt: Date;
+  }[];
+}
+
 const ACTIVE_BOOKING_STATUSES = ["requested", "accepted", "in-progress"];
 
 const ALLOWED_BOOKING_STATUSES = new Set([
@@ -376,14 +386,17 @@ router.patch(
         changedAt: now,
       };
 
-      const updateDoc: UpdateFilter<Document> = {
+      const updateDoc: UpdateFilter<BookingStatusUpdateDoc> = {
         $set: setFields,
         $push: {
           statusHistory: historyEntry,
         },
       };
 
-      await bookingsCollection.updateOne({ _id: new ObjectId(id) }, updateDoc);
+      await bookingsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        updateDoc as UpdateFilter<Document>
+      );
 
       const existingHistory = Array.isArray(booking.statusHistory)
         ? booking.statusHistory
@@ -452,7 +465,7 @@ router.patch(
         changedAt: now,
       };
 
-      const updateDoc: UpdateFilter<Document> = {
+      const updateDoc: UpdateFilter<BookingStatusUpdateDoc> = {
         $set: {
           status: "cancelled",
           updatedAt: now,
@@ -462,7 +475,10 @@ router.patch(
         },
       };
 
-      await bookingsCollection.updateOne({ _id: new ObjectId(id) }, updateDoc);
+      await bookingsCollection.updateOne(
+        { _id: new ObjectId(id) },
+        updateDoc as UpdateFilter<Document>
+      );
 
       const existingHistory = Array.isArray(booking.statusHistory)
         ? booking.statusHistory

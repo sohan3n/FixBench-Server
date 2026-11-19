@@ -26,6 +26,12 @@ function getStripe(): Stripe {
   return stripeClient;
 }
 
+function getPrimaryClientUrl(): string {
+  const raw = process.env.CLIENT_URL || "http://localhost:3000";
+  const firstOrigin = raw.split(",")[0]?.trim().replace(/\/+$/, "");
+  return firstOrigin || "http://localhost:3000";
+}
+
 interface FulfillmentResult {
   payment: Record<string, unknown>;
   paymentType: "booking" | "pro_plan";
@@ -235,7 +241,9 @@ export async function stripeWebhookHandler(
     res.status(200).json({ received: true });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Webhook signature verification failed";
+      error instanceof Error
+        ? error.message
+        : "Webhook signature verification failed";
     console.error("Stripe webhook error:", message);
     res.status(400).json({ message: `Webhook Error: ${message}` });
   }
@@ -297,11 +305,10 @@ router.post(
       }
 
       const stripe = getStripe();
-      const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+      const clientUrl = getPrimaryClientUrl();
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card"],
         customer_email: req.user!.email,
         line_items: [
           {
@@ -352,11 +359,10 @@ router.post(
       }
 
       const stripe = getStripe();
-      const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+      const clientUrl = getPrimaryClientUrl();
 
       const session = await stripe.checkout.sessions.create({
         mode: "payment",
-        payment_method_types: ["card"],
         customer_email: req.user!.email,
         line_items: [
           {
