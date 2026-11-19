@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/users.js";
+import serviceRoutes from "./routes/services.js";
 
 dotenv.config();
 
@@ -20,7 +21,7 @@ app.use(
   })
 );
 
-// Note: Stripe raw-body webhook route will be mounted BEFORE express.json() in Step 5
+// Note: Stripe raw-body webhook route will be mounted BEFORE express.json() in Phase 2.6
 app.use(express.json());
 
 app.get("/health", (_req: Request, res: Response) => {
@@ -31,8 +32,9 @@ app.get("/health", (_req: Request, res: Response) => {
   });
 });
 
-// Protected & Domain Routes
+// Public & Protected Domain Routes
 app.use("/api/users", userRoutes);
+app.use("/api/services", serviceRoutes);
 
 // 404 Fallback for unknown API routes
 app.use((_req: Request, res: Response) => {
