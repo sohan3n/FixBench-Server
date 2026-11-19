@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
+import userRoutes from "./routes/users.js";
 
 dotenv.config();
 
@@ -19,7 +20,7 @@ app.use(
   })
 );
 
-// Note: Stripe raw-body webhook route will be mounted BEFORE express.json() in Phase 2.6
+// Note: Stripe raw-body webhook route will be mounted BEFORE express.json() in Step 5
 app.use(express.json());
 
 app.get("/health", (_req: Request, res: Response) => {
@@ -28,6 +29,14 @@ app.get("/health", (_req: Request, res: Response) => {
     service: "FixBench API",
     timestamp: new Date().toISOString(),
   });
+});
+
+// Protected & Domain Routes
+app.use("/api/users", userRoutes);
+
+// 404 Fallback for unknown API routes
+app.use((_req: Request, res: Response) => {
+  res.status(404).json({ message: "API route not found" });
 });
 
 async function startServer() {
