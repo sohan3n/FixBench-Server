@@ -6,6 +6,7 @@ import userRoutes from "./routes/users.js";
 import serviceRoutes from "./routes/services.js";
 import bookingRoutes from "./routes/bookings.js";
 import adminRoutes from "./routes/admin.js";
+import paymentRoutes, { stripeWebhookHandler } from "./routes/payments.js";
 
 dotenv.config();
 
@@ -23,7 +24,13 @@ app.use(
   })
 );
 
-// Note: Stripe raw-body webhook route will be mounted BEFORE express.json() in Phase 2.6
+// Stripe Webhook MUST receive the raw unparsed body before express.json()
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  stripeWebhookHandler
+);
+
 app.use(express.json());
 
 app.get("/health", (_req: Request, res: Response) => {
@@ -39,6 +46,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/payments", paymentRoutes);
 
 // 404 Fallback for unknown API routes
 app.use((_req: Request, res: Response) => {
