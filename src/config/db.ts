@@ -50,6 +50,13 @@ export async function connectDB(): Promise<Db> {
       createdAt: -1,
     }),
     bookingsCollection.createIndex({ serviceId: 1, rating: 1 }),
+    bookingsCollection.createIndex({ customerEmail: 1, createdAt: -1 }),
+    bookingsCollection.createIndex({
+      customerEmail: 1,
+      serviceId: 1,
+      status: 1,
+    }),
+    bookingsCollection.createIndex({ technicianEmail: 1, createdAt: -1 }),
   ]);
 
   console.log(`Connected to MongoDB database: ${dbName}`);
