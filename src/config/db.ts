@@ -45,6 +45,10 @@ export async function connectDB(): Promise<Db> {
       serviceMode: 1,
       basePrice: 1,
     }),
+    servicesCollection.createIndex({
+      technicianEmail: 1,
+      createdAt: -1,
+    }),
     bookingsCollection.createIndex({ serviceId: 1, rating: 1 }),
   ]);
 
