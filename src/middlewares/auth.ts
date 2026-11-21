@@ -3,8 +3,16 @@ import { createRemoteJWKSet, jwtVerify } from "jose";
 import { getCollections } from "../config/db.js";
 import { TechnicianPlan, UserRole } from "../types/index.js";
 
-const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
-const JWKS = createRemoteJWKSet(new URL(`${clientUrl}/api/auth/jwks`));
+const rawJwksBase =
+  process.env.JWKS_URL ||
+  process.env.BETTER_AUTH_URL ||
+  (process.env.CLIENT_URL || "http://localhost:3000")
+    .split(",")[0]
+    .trim()
+    .replace(/\/+$/, "");
+
+const jwksUrl = `${rawJwksBase.replace(/\/+$/, "")}/api/auth/jwks`;
+const JWKS = createRemoteJWKSet(new URL(jwksUrl));
 
 export async function verifyToken(
   req: Request,

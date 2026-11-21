@@ -5,7 +5,7 @@ import { verifyTechnician, verifyToken } from "../middlewares/auth.js";
 
 const router = Router();
 
-const FREE_PLAN_SERVICE_LIMIT = 3;
+const FREE_PLAN_SERVICE_LIMIT = 2;
 
 const ALLOWED_CATEGORIES = new Set([
   "Smartphone",
@@ -313,7 +313,7 @@ router.post(
         if (existingCount >= FREE_PLAN_SERVICE_LIMIT) {
           res.status(403).json({
             message:
-              "Free plan technicians can list up to 3 services. Upgrade to Pro for unlimited listings.",
+              "Free plan technicians can list up to 2 services. Upgrade to Pro for unlimited listings.",
             code: "FREE_PLAN_LIMIT_REACHED",
           });
           return;
@@ -753,6 +753,7 @@ router.get("/:id", async (req: Request, res: Response) => {
               customerName: 1,
               rating: 1,
               review: 1,
+              reviewComment: 1,
               updatedAt: 1,
               createdAt: 1,
             },
@@ -795,7 +796,12 @@ router.get("/:id", async (req: Request, res: Response) => {
         _id: item._id.toString(),
         customerName: item.customerName || "Verified Customer",
         rating: Number(item.rating),
-        review: typeof item.review === "string" ? item.review : "",
+        reviewComment:
+          typeof item.reviewComment === "string"
+            ? item.reviewComment
+            : typeof item.review === "string"
+              ? item.review
+              : "",
         createdAt: item.updatedAt || item.createdAt,
       })),
     });

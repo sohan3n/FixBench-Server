@@ -14,12 +14,17 @@ const scryptAsync = promisify(crypto.scrypt);
  */
 async function hashBetterAuthPassword(password: string): Promise<string> {
   const saltHex = crypto.randomBytes(16).toString("hex");
-  const derivedKey = (await scryptAsync(password.normalize("NFKC"), saltHex, 64, {
-    N: 16384,
-    r: 16,
-    p: 1,
-    maxmem: 128 * 16384 * 16 * 2,
-  })) as Buffer;
+  const derivedKey = (await (scryptAsync as any)(
+    password.normalize("NFKC"),
+    saltHex,
+    64,
+    {
+      N: 16384,
+      r: 16,
+      p: 1,
+      maxmem: 128 * 16384 * 16 * 2,
+    }
+  )) as Buffer;
 
   return `${saltHex}:${derivedKey.toString("hex")}`;
 }

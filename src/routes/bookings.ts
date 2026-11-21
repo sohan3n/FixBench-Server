@@ -514,10 +514,18 @@ router.patch(
         return;
       }
 
-      const { rating, review } = req.body as {
+      const { rating, review, reviewComment } = req.body as {
         rating?: unknown;
         review?: unknown;
+        reviewComment?: unknown;
       };
+
+      const rawReview =
+        typeof reviewComment === "string"
+          ? reviewComment
+          : typeof review === "string"
+            ? review
+            : "";
 
       const parsedRating = Number(rating);
       if (
@@ -532,9 +540,9 @@ router.patch(
       }
 
       if (
-        typeof review !== "string" ||
-        review.trim().length < 3 ||
-        review.trim().length > 500
+        typeof rawReview !== "string" ||
+        rawReview.trim().length < 3 ||
+        rawReview.trim().length > 500
       ) {
         res.status(400).json({
           message: "Review must be between 3 and 500 characters long",
@@ -574,14 +582,14 @@ router.patch(
       }
 
       const now = new Date();
-      const trimmedReview = review.trim();
+      const trimmedReview = rawReview.trim();
 
       await bookingsCollection.updateOne(
         { _id: new ObjectId(id) },
         {
           $set: {
             rating: parsedRating,
-            review: trimmedReview,
+            reviewComment: trimmedReview,
             updatedAt: now,
           },
         }
@@ -593,7 +601,7 @@ router.patch(
           ...booking,
           _id: id,
           rating: parsedRating,
-          review: trimmedReview,
+          reviewComment: trimmedReview,
           updatedAt: now,
         },
       });

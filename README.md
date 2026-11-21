@@ -49,3 +49,11 @@ BETTER_AUTH_URL=https://<your-client-domain>.vercel.app
 JWKS_URL=https://<your-client-domain>.vercel.app/api/auth/jwks
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+
+---
+
+## NPM Packages Used
+
+**Dependencies:** `cors`, `dotenv`, `express`, `jose`, `mongodb`, `nodemon`, `stripe`
+
+**Dev Dependencies:** `@types/cors`, `@types/express`, `@types/node`, `tsx`, `typescript`
