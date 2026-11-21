@@ -6,8 +6,8 @@ Backend REST API and Stripe webhook processor for **FixBench**, a verified repai
 
 ## Live Links & Repositories
 
-- **Live Client Application:** `https://<your-client-domain>.vercel.app`
-- **Live API Server:** `https://<your-server-domain>.vercel.app`
+- **Live Client Application:** `https://fix-bench.vercel.app`
+- **Live API Server:** `https://fix-bench-server.vercel.app`
 - **Client Repository:** `https://github.com/sohan3n/fix-bench`
 - **Server Repository:** `https://github.com/sohan3n/fix-bench-server`
 
